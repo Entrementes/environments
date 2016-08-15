@@ -1,0 +1,24 @@
+---
+- name: Add docker apt key
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D state=present validate_certs=no
+
+- name: Add docker apt repo
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-xenial main' state=present
+
+- name: Install Docker
+  apt: name={{ item }}
+  with_items:
+    - docker-engine
+
+- name: Install docker-compose
+  pip: name={{ item }}
+  with_items:
+    - docker-compose
+    - requests
+    - docker-py
+
+- name: Add user sysuser to the docker group
+  user: name=senpai groups=docker append=yes
+
+- name: Add relase user to docker group
+  user: name=kouhai groups=docker append=yes

@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.ssh.insert_key = false
+  
+  config.vm.define "constantinopla.entrementes.org" do |constantinopla|
+    constantinopla.vm.hostname = "constantinopla"
+    constantinopla.vm.network :private_network, ip: "192.168.171.10", virtualbox__intnet: false
+    constantinopla.vm.network :forwarded_port, guest: 5000, host: 5000
+    constantinopla.vm.network :forwarded_port, guest: 80, host: 8080
+    constantinopla.vm.network :forwarded_port, guest: 443, host: 5443
+    constantinopla.vm.box = "bento/ubuntu-16.04"
+    constantinopla.vm.provider :virtualbox do |vb|
+
+      unless File.exist?('./app_logs.vdi')
+        vb.customize ['createhd', '--filename', './app_logs.vdi', '--variant', 'Fixed', '--size', 3 * 1024]
+      end
+      unless File.exist?('./docker_reg.vdi')
+        vb.customize ['createhd', '--filename', './docker_reg.vdi', '--variant', 'Fixed', '--size', 3 * 1024]
+      end
+      unless File.exist?('./git_repos.vdi')
+        vb.customize ['createhd', '--filename', './git_repos.vdi', '--variant', 'Fixed', '--size', 3 * 1024]
+      end
+      
+      vb.memory = 2048
+      vb.cpus = 2
+      vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', './app_logs.vdi']
+      vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', './docker_reg.vdi']
+      vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', './git_repos.vdi']
+    end
+  end
+
+  #Common Setup
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/bootstrap.yml"
+    ansible.inventory_path ="./provisioning/hosts"
+    ansible.limit = "all"
+    ansible.sudo = true
+  end
+
+  #Host Specific
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/constantinopla.yml"
+    ansible.inventory_path ="./provisioning/hosts"
+    ansible.limit = "all"
+    ansible.sudo = true
+    ansible.raw_arguments = "--ask-vault-pass"
+  end
+
+end

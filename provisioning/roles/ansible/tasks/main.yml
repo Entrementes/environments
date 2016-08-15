@@ -1,0 +1,5 @@
+---
+- name: Install Ansible
+  pip: name={{ item }} state=latest
+  with_items:
+    - ansible

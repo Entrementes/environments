@@ -1,0 +1,38 @@
+---
+- name: Check registry path
+  stat: path=/gitlab
+  register: gitlab_home
+
+- name: Prepare Docker Registry Storage
+  file:
+    path: /gitlab/{{ item }}
+    state: directory
+    mode: 750
+  with_items:
+    - repos
+    - logs
+    - config
+  when: not gitlab_home.stat.exists
+
+- name: Add Gitlab extra files
+  copy:
+    src: '{{ item.file }}'
+    dest: '/gitlab/{{ item.sub_path }}'
+  with_items:
+    - { sub_path: '' , file: 'docker-compose.yml' }
+  notify: Start Gitlab
+
+- name: Add Gitlab extra templates
+  template:
+    src: '{{ item.file }}.j2'
+    dest: '/gitlab/{{ item.sub_path }}/{{ item.file }}'
+  with_items:
+    - { sub_path: 'config' , file: 'gitlab.rb' }
+  notify: Start Gitlab
+
+- name: Add init scripts
+  copy:
+    src: gitlab-container.service
+    dest: /lib/systemd/system/gitlab-container.service
+  notify: Start Gitlab
+

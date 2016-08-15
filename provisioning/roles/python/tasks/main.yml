@@ -1,0 +1,22 @@
+---
+- name: Install SYS Packages
+  apt: pkg={{ item }} state=present force=yes
+  with_items:
+    - build-essential 
+    - python-pip
+    - python-dev
+    - gcc
+    - libffi-dev
+    - libssl-dev
+
+- name: Install Python Packages
+  pip: name={{ item }} state=latest
+  with_items:
+    - pip
+    - setuptools
+    - paramiko
+    - PyYAML
+
+
+
+

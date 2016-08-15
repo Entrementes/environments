@@ -1,0 +1,37 @@
+---
+- name: Install lvm binaries
+  apt: pkg=lvm2 state=present force=yes
+
+- name: Checking essentials variables
+  fail: msg="Please provide {{ item }} to install"
+  when: "{{ item }} is not defined or {{ item }} == 'None'"
+  with_items:
+    - lvm_dev
+    - lvm_path
+
+- name: Find scsci hosts
+  shell: ls -1 /sys/class/scsi_host/
+  register: scsi_hosts
+  changed_when: False
+
+- name: Rescanning your SCSI bus to see new storage
+  shell: "echo '- - -' > /sys/class/scsi_host/{{ item }}/scan"
+  with_items: '{{ scsi_hosts.stdout_lines }}'
+  changed_when: False
+
+- name: Create volume group
+  lvg: vg="{{ lvm_vgname }}" pvs="{{ lvm_dev }}"
+  register: volume_group
+
+- name: Create logical volume
+  lvol: vg="{{ lvm_vgname }}" lv="{{ lvm_lvname }}" size="100%FREE"
+  when: volume_group.changed
+
+- name: Create the filesystem on the block device 
+  filesystem: fstype={{ lvm_fstype }} dev="{{ lvm_mapper }}"
+
+- name: Create extra mount points
+  file: path={{ lvm_path }} state=directory mode=0755
+
+- name: Mount extra filesystems
+  mount: name={{ lvm_path }} src="{{ lvm_mapper }}" fstype={{ lvm_fstype }} state=mounted

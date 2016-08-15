@@ -1,0 +1,12 @@
+[Unit]
+Description=Docker Registry
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/local/bin/docker-compose -f /docker-registry/docker-compose.yml up --no-recreate
+ExecStop=/usr/local/bin/docker-compose -f /docker-registry/docker-compose.yml stop
+
+[Install]
+WantedBy=local.target

@@ -1,0 +1,12 @@
+web:
+  image: 'gitlab/gitlab-ce:latest'
+  restart: always
+  hostname: 'gitlab.example.com'
+  ports:
+    - '8088:80'
+    - '2224:22'
+    - '5443:443'
+  volumes:
+    - './config:/etc/gitlab'
+    - '/application-logs:/var/log/gitlab'
+    - '/git-repositories:/var/opt/gitlab'

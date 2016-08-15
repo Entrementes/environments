@@ -1,0 +1,55 @@
+---
+- hosts: entrementes
+  gather_facts: False
+  pre_tasks:
+    - raw: sudo apt-get -y install python-simplejson
+  tasks:
+    - name: Disable the firewall (since this is for local dev only).
+      service: name=ufw state=stopped
+      # when: entementes_env == DEV
+
+    - name: Wait for ssh to become available
+      become: no
+      local_action: wait_for port=22 host="{{ inventory_hostname }}" search_regex=OpenSSH delay=2
+
+    - name: Add new ssh host signature
+      become: no
+      local_action: shell ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
+
+    - name: Set admin user name
+      set_fact: admin_user="senpai"
+
+    - name: Create admin group
+      group: name="{{ admin_user }}" gid=701 state=present
+
+    - name: Create admin user
+      user: name="{{ admin_user }}"  comment="The Administrator user" uid=701 group="{{ admin_user }}" groups=sudo shell='/bin/bash'
+
+    - name: bootstrap | No password for user root
+      user: name=root password='*'
+
+    - name: bootstrap | Enable sudo without password (Debian)
+      lineinfile: "dest=/etc/sudoers state=present regexp='^%sudo' line='%sudo   ALL=(ALL) NOPASSWD: ALL'"
+
+    - name: Set up authorized_keys for the admin user
+      authorized_key: user="{{ admin_user }}" key="{{ lookup('file', item) }}"
+      with_fileglob: 'keys/*.pub'
+
+    - name: Set simple user name
+      set_fact: simple_user="kouhai"
+
+    - name: Create simple user group
+      group: name="{{ simple_user }}" gid=901 state=present
+
+    - name: Create simple user
+      user: name="{{ simple_user }}" comment="The Regular user" uid=901 group="{{ simple_user }}" shell='/bin/bash'
+
+    - name: Set up authorized_keys for the simple user
+      authorized_key: user="{{ simple_user }}" key="{{ lookup('file', item) }}"
+      with_fileglob: 'keys/*.pub'
+
+    - name: Update APT repo
+      apt: update_cache=yes
+
+
+

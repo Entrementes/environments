@@ -1,0 +1,5 @@
+---
+- name: Start Gitlab
+  service:
+    name: gitlab-container
+    state: started

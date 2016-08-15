@@ -1,0 +1,10 @@
+---
+lvm_dev: None
+lvm_path: None
+
+lvm_fstype: ext4
+lvm_vgname: "vg{{ lvm_path|replace('/', '_') }}"
+lvm_lvname: "lv{{ lvm_path|replace('/', '_') }}"
+lvm_mapper: "/dev/mapper/{{ lvm_vgname|replace('-', '--') }}-{{ lvm_lvname|replace('-', '--') }}"
+lvm_dump: 1
+lvm_passno: 2

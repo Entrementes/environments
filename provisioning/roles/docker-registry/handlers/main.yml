@@ -1,0 +1,9 @@
+- name: Restart Docker
+  service:
+    name: docker 
+    state: restarted
+
+- name: Start Docker-Registry
+  service:
+    name: docker-registry 
+    state: started

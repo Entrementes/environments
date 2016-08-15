@@ -1,0 +1,20 @@
+[localhost]
+localhost ansible_connection=local
+
+[build]
+constantinopla.entrementes.org
+
+# [app]
+# atlantis.constantinopla.entrementes.org
+
+# [log]
+# alexandria.constantinopla.entrementes.org
+
+# [database]
+# babilonia.constantinopla.entrementes.org
+
+[entrementes:children]
+build
+# app
+# log
+# database

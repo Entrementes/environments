@@ -1,0 +1,50 @@
+---
+- name: Check registry path
+  stat: path=/docker-registry/data
+  register: docker_registry_storage
+
+- name: Prepare Docker Registry Storage
+  file:
+    path: /docker-registry/{{ item }}
+    state: directory
+    mode: 750
+  with_items:
+    - data
+    - nginx
+  when: not docker_registry_storage.stat.exists
+
+- name: Add Registry compose file
+  copy:
+    src: '{{ item.file }}'
+    dest: '/docker-registry/{{ item.sub_path }}'
+  with_items:
+    - { sub_path: '' , file: 'docker-compose.yml' }
+    - { sub_path: 'nginx/' , file: 'registry.conf' }
+    - { sub_path: 'nginx/' , file: 'domain.crt' }
+    - { sub_path: 'nginx/' , file: 'domain.key' }
+  notify: Start Docker-Registry
+
+- name: Prepare Docker Registry Certificate directory
+  file:
+    path: /usr/local/share/ca-certificates/constantinopla.entrementes.org
+    state: directory
+  notify: Start Docker-Registry
+
+- name: Add self-signed Certificates
+  copy:
+    src: entrementesCA.crt
+    dest: /usr/local/share/ca-certificates/constantinopla.entrementes.org/entrementesCA.crt
+
+- name: Update Certificates
+  become: yes
+  shell: update-ca-certificates
+  notify: Restart Docker
+  notify: Start Docker-Registry
+
+- name: Add init scripts
+  copy:
+    src: docker-registry.service
+    dest: /lib/systemd/system/docker-registry.service
+  notify: Start Docker-Registry
+
+

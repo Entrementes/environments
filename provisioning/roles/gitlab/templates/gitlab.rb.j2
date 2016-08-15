@@ -1,0 +1,21 @@
+## Url on which GitLab will be reachable.
+## For more details on configuring external_url see:
+## https://gitlab.com/gitlab-org/omnibus-gitlab/blob/629def0a7a26e7c2326566f0758d4a27857b52a3/README.md#configuring-the-external-url-for-gitlab
+external_url "http://constantinopla.entrementes.org"
+
+gitlab_rails['gitlab_email_from'] = "gunisalvo.entrementes@gmail.com"
+gitlab_rails['initial_root_password'] = "{{ password.gitlab.root }}"
+gitlab_rails['gitlab_signup_enabled'] = false
+
+gitlab_rails['gitlab_shell_ssh_port'] = 2224
+
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtp.gmail.com"
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = "gunisalvo.entrementes@gmail.com"
+gitlab_rails['smtp_password'] = "{{ password.gitlab.email }}"
+gitlab_rails['smtp_domain'] = "smtp.gmail.com"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = false
+gitlab_rails['smtp_openssl_verify_mode'] = "peer"
