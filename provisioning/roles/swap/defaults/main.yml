@@ -1,0 +1,5 @@
+# Swap settings
+swapfile_location: /swapfile
+swapfile_size: 1G
+swapfile_swappiness: 10
+swapfile_vfs_cache_pressure: 50

@@ -8,6 +8,7 @@
     - { role: lvm, lvm_dev: '/dev/sdb', lvm_path: '/application-logs' }
     - { role: lvm, lvm_dev: '/dev/sdc', lvm_path: '/container-registry' }
     - { role: lvm, lvm_dev: '/dev/sdd', lvm_path: '/git-repositories' }
+    - { role: swap }
     - { role: sys-monitoring }
     - { role: python }
     - { role: ansible }
