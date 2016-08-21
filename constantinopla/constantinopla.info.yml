@@ -1,0 +1,8 @@
+---
+node:
+  name: constantinopla
+  url: https://api.digitalocean.com/v2/droplets/23202498/actions
+  volumes:
+    - https://api.digitalocean.com/v2/volumes/e7b4b099-6726-11e6-9054-000f533176b1/actions
+    - https://api.digitalocean.com/v2/volumes/e841e3e0-6726-11e6-a5af-000f53315a41/actions
+    - https://api.digitalocean.com/v2/volumes/e9033584-6726-11e6-a5af-000f53315a41/actions

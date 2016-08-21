@@ -5,13 +5,13 @@ localhost ansible_connection=local
 constantinopla.entrementes.org
 
 # [app]
-# atlantis.constantinopla.entrementes.org
+# atlantis.entrementes.org
 
 # [log]
-# alexandria.constantinopla.entrementes.org
+# alexandria.entrementes.org
 
 # [database]
-# babilonia.constantinopla.entrementes.org
+# babilonia.entrementes.org
 
 [entrementes:children]
 build
