@@ -29,6 +29,7 @@ $ ansible-playbook provisioning/constantinopla.yml --ask-vault-pass -i hosts.atl
 
 ```
 $ cd environments/boxes/constantinopla/
+$ export DO_TOKEN=<< YOR DIGITAL OCEAN API TOKEN >>
 $ python ../../toolkit/digitalocean_cli.py -n atlantis.info.yml -a start
 $ python ../../toolkit/digitalocean_cli.py -n atlantis.info.yml -a stop
 $ python ../../toolkit/digitalocean_cli.py -n atlantis.info.yml -a delete
