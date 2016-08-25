@@ -1,0 +1,12 @@
+- hosts: service-discovery
+  remote_user: senpai
+  become: yes
+  gather_facts: true
+  vars_files:
+    # - vars/secret.yml
+    - vars/user-mapping.yml
+  roles:
+    - { role: swap }
+    - { role: sys-monitoring }
+    - { role: python }
+    - { role: consul }

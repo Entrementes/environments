@@ -4,8 +4,9 @@
   become: yes
   vars_files:
     - vars/secret.yml
+    - vars/user-mapping.yml
   roles:
-    - { role: lvm, lvm_dev: '/dev/sda', lvm_path: '/application-logs' }
+    - { role: lvm, lvm_dev: '/dev/sdd', lvm_path: '/application-logs' }
     - { role: lvm, lvm_dev: '/dev/sdb', lvm_path: '/container-registry' }
     - { role: lvm, lvm_dev: '/dev/sdc', lvm_path: '/git-repositories' }
     - { role: swap }
@@ -13,5 +14,6 @@
     - { role: python }
     - { role: ansible }
     - { role: docker }
-    - { role: docker-registry }
+    - { role: docker-registry, tasks: configure-registry-connection }
+    - { role: docker-registry, tasks: create-registry }
     - { role: gitlab }

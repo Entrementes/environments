@@ -1,0 +1,51 @@
+- name: Create Consul Group
+  group: 
+    name: "{{ users.service_discovery.name }}" 
+    gid: "{{ users.service_discovery.id }}" 
+    state: present
+
+- name: Create Consul User
+  user: 
+    name: "{{ users.service_discovery.name }}" 
+    uid: "{{ users.service_discovery.id }}" 
+    group: "{{ users.service_discovery.name }}"
+    comment: The Consul user 
+    shell: "/bin/bash"
+
+- name: Fetch Consul Binaries
+  unarchive: 
+    src: "https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip"
+    dest: "/usr/bin/"
+    copy: no
+    mode: 755
+  # notify: Start Consul Agent
+
+- name: Create Consul Configuration Directory
+  file: 
+    dest: "/etc/consul.d/{{ item }}"
+    state: directory
+  with_items:
+    - bootstrap
+    - server
+  # notify: Start Consul Agent
+
+- name: Create Storage Directory
+  file: 
+    dest: "/var/consul/"
+    state: directory
+    owner: "{{ users.service_discovery.name }}"
+    group: "{{ users.service_discovery.name }}"
+  register: consul_storage
+  # notify: Start Consul Agent
+
+- name: Create Storage Directory is...
+  debug:
+    msg: "{{ consul_storage.path }}"
+
+- name: Add consul configuration file
+  template: 
+    src: "{{ item.file }}.j2"
+    dest: "/etc/consul.d/{{ item.sub_path }}/{{ item.dest_file }}"
+  with_items:
+    - { sub_path: "bootstrap", file: "bootstrap.config.json", dest_file: "config.json"  }
+    - { sub_path: "server", file: "server.config.json", dest_file: "config.json"  }

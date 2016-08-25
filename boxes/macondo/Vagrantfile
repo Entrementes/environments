@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.ssh.insert_key = false
+  
+  node_count = 3
+
+  node_count.times do |index|
+    config.vm.define "macondo#{index + 1}.entrementes.org" do |macondo|
+      macondo.vm.hostname = "macondo#{index + 1}"
+      macondo.vm.network :private_network, ip: "192.168.171.3#{index + 1}"
+      macondo.vm.network :forwarded_port, guest: 8300, host: "83#{index + 1}0"
+      macondo.vm.network :forwarded_port, guest: 8500, host: "85#{index + 1}0"
+      macondo.vm.box = "bento/ubuntu-16.04"
+      macondo.vm.provider :virtualbox do |vb|
+        vb.memory = 512
+      end
+    end
+  end
+  
+  #Common Setup
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/bootstrap.vagrant.yml"
+    ansible.inventory_path ="./hosts.macondo"
+    ansible.limit = "all"
+    ansible.sudo = true
+  end
+
+  #Host Specific
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/macondo.yml"
+    ansible.inventory_path ="./hosts.macondo"
+    ansible.limit = "all"
+    ansible.sudo = true
+    # ansible.raw_arguments = "--ask-vault-pass"
+  end
+end

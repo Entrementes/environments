@@ -8,12 +8,19 @@
     - sysstat
 
 - name: Enable sysstat
-  lineinfile: dest=/etc/default/sysstat  regexp='^ENABLED=' line='ENABLED="true"'
+  lineinfile: 
+    dest: /etc/default/sysstat  
+    regexp: ^ENABLED= 
+    line: 'ENABLED="true"'
 
 - name: Set sysstat interval to 5 min
-  template: src=sysstat-cron.j2 dest=/etc/cron.d/sysstat
+  template: 
+    src: sysstat-cron.j2 
+    dest: /etc/cron.d/sysstat
 
 - name: Set sysstat history to 40 days
-  template: src=sysstat.j2 dest=/etc/sysstat/sysstat
+  template: 
+    src: sysstat.j2 
+    dest: /etc/sysstat/sysstat
   notify: Restart sysstat
     

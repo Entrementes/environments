@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.ssh.insert_key = false
+  
+  config.vm.define "atlantis.entrementes.org" do |atlantis|
+    atlantis.vm.hostname = "atlantis"
+    atlantis.vm.network :private_network, ip: "192.168.171.20"
+    atlantis.vm.box = "bento/ubuntu-16.04"
+    atlantis.vm.provider :virtualbox do |vb|
+
+      unless File.exist?('./app_logs.vdi')
+        vb.customize ['createhd', '--filename', './app_logs.vdi', '--variant', 'Fixed', '--size', 3 * 1024]
+      end
+      
+      vb.memory = 512
+      vb.cpus = 1
+      vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', './app_logs.vdi']
+    end
+  end
+
+  #Common Setup
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/bootstrap.vagrant.yml"
+    ansible.inventory_path ="./hosts.atlantis"
+    ansible.limit = "all"
+    ansible.sudo = true
+  end
+
+  #Host Specific
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/atlantis.yml"
+    ansible.inventory_path ="./hosts.atlantis"
+    ansible.limit = "all"
+    ansible.sudo = true
+    ansible.raw_arguments = "--ask-vault-pass"
+  end
+
+end

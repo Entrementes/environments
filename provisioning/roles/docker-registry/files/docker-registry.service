@@ -5,6 +5,7 @@ After=docker.service
 
 [Service]
 Restart=always
+User=docker-registry
 ExecStart=/usr/local/bin/docker-compose -f /docker-registry/docker-compose.yml up --no-recreate
 ExecStop=/usr/local/bin/docker-compose -f /docker-registry/docker-compose.yml stop
 

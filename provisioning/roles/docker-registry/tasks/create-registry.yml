@@ -1,0 +1,64 @@
+---
+- name: Create Docker Registry group
+  group: 
+    name: "{{ users.container_registry.name }}" 
+    gid: "{{ users.container_registry.id }}" 
+    state: present
+
+- name: Create Docker Registry user
+  user: 
+    name: "{{ users.container_registry.name }}" 
+    uid: "{{ users.container_registry.id }}" 
+    group: "{{ users.container_registry.name }}"
+    comment: The Docker Registry user 
+    shell: "/bin/bash"
+
+- name: Add Docker Registry user to docker group
+  user: 
+    name: "{{ users.container_registry.name }}" 
+    groups: docker 
+    append: yes
+
+- name: Prepare Docker Registry Directories
+  file:
+    path: "/docker-registry/{{ item }}"
+    state: directory
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.container_registry.name }}"
+    group: "{{ users.container_registry.name }}"
+  with_items:
+    - data
+
+- name: Change Storage Ownership
+  file:
+    path: "/container-registry"
+    state: directory
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.container_registry.name }}"
+    group: "{{ users.container_registry.name }}"
+
+- name: Prepare Docker Registry Log Directory
+  file:
+    path: "/application-logs/docker-registry/"
+    state: directory
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.container_registry.name }}"
+    group: "{{ users.container_registry.name }}"
+  notify: Start Docker-Registry
+
+- name: Add Registry compose file
+  copy:
+    src: "{{ item.file }}"
+    dest: "/docker-registry/{{ item.sub_path }}"
+    mode: "u=rw,g=r"
+    owner: "{{ users.container_registry.name }}"
+    group: "{{ users.container_registry.name }}"
+  with_items:
+    - { sub_path: "" , file: "docker-compose.yml" }
+  notify: Start Docker-Registry
+
+- name: Add init scripts
+  copy:
+    src: "docker-registry.service"
+    dest: "/lib/systemd/system/docker-registry.service"
+  notify: Start Docker-Registry

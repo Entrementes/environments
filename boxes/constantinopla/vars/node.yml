@@ -1,0 +1,6 @@
+node_name: constantinopla
+node_size: 2gb
+node_volumes:
+  - { size: 1, name: "{{ node_name }}-logs", description: "Log Archives"}
+  - { size: 1, name: "{{ node_name }}-registry", description: "Docker Registry Archives"}
+  - { size: 1, name: "{{ node_name }}-repository", description: "Repository Archives"}

@@ -1,9 +1,13 @@
 ---
 - name: Install lvm binaries
-  apt: pkg=lvm2 state=present force=yes
+  apt: 
+    pkg: lvm2 
+    state: present
+    force: yes
 
 - name: Checking essentials variables
-  fail: msg="Please provide {{ item }} to install"
+  fail: 
+    msg: "Please provide {{ item }} to install"
   when: "{{ item }} is not defined or {{ item }} == 'None'"
   with_items:
     - lvm_dev
@@ -20,18 +24,32 @@
   changed_when: False
 
 - name: Create volume group
-  lvg: vg="{{ lvm_vgname }}" pvs="{{ lvm_dev }}"
+  lvg: 
+    vg: "{{ lvm_vgname }}" 
+    pvs: "{{ lvm_dev }}"
   register: volume_group
 
 - name: Create logical volume
-  lvol: vg="{{ lvm_vgname }}" lv="{{ lvm_lvname }}" size="100%FREE"
+  lvol: 
+    vg: "{{ lvm_vgname }}" 
+    lv: "{{ lvm_lvname }}" 
+    size: "100%FREE"
   when: volume_group.changed
 
 - name: Create the filesystem on the block device 
-  filesystem: fstype={{ lvm_fstype }} dev="{{ lvm_mapper }}"
+  filesystem: 
+    fstype: "{{ lvm_fstype }}" 
+    dev: "{{ lvm_mapper }}"
 
 - name: Create extra mount points
-  file: path={{ lvm_path }} state=directory mode=0755
+  file: 
+    path: "{{ lvm_path }}" 
+    state: directory 
+    mode: "u=rwx,g=rx,o=rx"
 
 - name: Mount extra filesystems
-  mount: name={{ lvm_path }} src="{{ lvm_mapper }}" fstype={{ lvm_fstype }} state=mounted
+  mount: 
+    name: "{{ lvm_path }}" 
+    src: "{{ lvm_mapper }}" 
+    fstype: "{{ lvm_fstype }}" 
+    state: mounted

@@ -1,0 +1,14 @@
+---
+- hosts: app
+  remote_user: senpai
+  become: yes
+  vars_files:
+    - vars/secret.yml
+    - vars/user-mapping.yml
+  roles:
+    - { role: lvm, lvm_dev: '/dev/sdb', lvm_path: '/application-logs' }
+    - { role: swap }
+    - { role: sys-monitoring }
+    - { role: python }
+    - { role: docker }
+    - { role: docker-registry }

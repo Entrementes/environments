@@ -1,56 +1,74 @@
 ---
-- hosts: entrementes
-  gather_facts: False
-  remote_user: root
-  pre_tasks:
-    - raw: sudo apt-get -y install python-simplejson
-  tasks:
-    - name: Disable the firewall (since this is for local dev only).
-      service: name=ufw state=stopped
-      # when: entementes_env == DEV
+- name: Ensure that python is available
+  raw: sudo apt-get -y install python-simplejson
 
-    # - name: Wait for ssh to become available
-    #   become: no
-    #   local_action: wait_for port=22 host="{{ inventory_hostname }}" search_regex=OpenSSH delay=2
+- name: Disable the firewall (since this is for local dev only).
+  service: 
+    name: ufw 
+    state: stopped
 
-    - name: Add new ssh host signature
-      become: no
-      local_action: shell ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
+- name: Add new ssh host signature
+  become: no
+  local_action: shell ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
 
-    - name: Set admin user name
-      set_fact: admin_user="senpai"
+- name: Create System group
+  group: 
+    name: "{{ users.system.name }}" 
+    gid: "{{ users.system.id }}" 
+    state: present
 
-    - name: Create admin group
-      group: name="{{ admin_user }}" gid=701 state=present
+- name: Create System user
+  user: 
+    name: "{{ users.system.name }}"
+    comment: "The Administrator user" 
+    uid: "{{ users.system.id }}" 
+    group: "{{ users.system.name }}" 
+    groups: sudo 
+    shell: "/bin/bash"
 
-    - name: Create admin user
-      user: name="{{ admin_user }}"  comment="The Administrator user" uid=701 group="{{ admin_user }}" groups=sudo shell='/bin/bash'
+- name: No password for user root
+  user: 
+    name: root 
+    password: "*"
 
-    - name: bootstrap | No password for user root
-      user: name=root password='*'
+- name: Enable sudo without password (Debian)
+  lineinfile:
+    dest: /etc/sudoers 
+    state: present 
+    regexp: "^%sudo" 
+    line: "%sudo   ALL=(ALL) NOPASSWD: ALL"
 
-    - name: bootstrap | Enable sudo without password (Debian)
-      lineinfile: "dest=/etc/sudoers state=present regexp='^%sudo' line='%sudo   ALL=(ALL) NOPASSWD: ALL'"
+- name: Set up authorized_keys for the System user
+  authorized_key: 
+    user: "{{ users.system.name }}" 
+    key: "{{ lookup('file', item) }}"
+  with_fileglob: "~/.ssh/*.pub"
 
-    - name: Set up authorized_keys for the admin user
-      authorized_key: user="{{ admin_user }}" key="{{ lookup('file', item) }}"
-      with_fileglob: '~/.ssh/*.pub'
+- name: Create Maintenance user group
+  group: 
+    name: "{{ users.maintenance.name }}" 
+    gid: "{{ users.maintenance.id }}" 
+    state: present
 
-    - name: Set simple user name
-      set_fact: simple_user="kouhai"
+- name: Create Maintenance user
+  user: 
+    name: "{{ users.maintenance.name }}" 
+    comment: "The Regular user" 
+    uid: "{{ users.maintenance.id }}" 
+    group: "{{ users.maintenance.name }}" 
+    shell: "/bin/bash"
 
-    - name: Create simple user group
-      group: name="{{ simple_user }}" gid=901 state=present
+- name: Set up authorized_keys for the Maintenance user
+  authorized_key: 
+    user: "{{ users.maintenance.name }}"
+    key: "{{ lookup('file', item) }}"
+  with_fileglob: "~/.ssh/*.pub"
 
-    - name: Create simple user
-      user: name="{{ simple_user }}" comment="The Regular user" uid=901 group="{{ simple_user }}" shell='/bin/bash'
+- name: Add hosts mapping
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
 
-    - name: Set up authorized_keys for the simple user
-      authorized_key: user="{{ simple_user }}" key="{{ lookup('file', item) }}"
-      with_fileglob: '~/.ssh/*.pub'
-
-    - name: Update APT repo
-      apt: update_cache=yes
-
-
-
+- name: Update APT repo
+  apt: 
+    update_cache: yes

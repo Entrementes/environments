@@ -1,0 +1,9 @@
+{ 
+	"datacenter": "entrementes",
+	"node_name": "{{ inventory_hostname.split('.')[0] }}",
+	"bind_addr": "{{ ansible_eth0['ipv4']['address'] }}",
+    "advertise_addr": "{{ ansible_eth0['ipv4']['address'] }}",
+    "rejoin_after_leave": true,
+    "server": true,
+    "data-dir": "/tmp/consul"
+}

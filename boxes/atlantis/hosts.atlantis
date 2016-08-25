@@ -1,0 +1,8 @@
+[localhost]
+localhost ansible_connection=local
+
+[app]
+atlantis.entrementes.org
+
+[entrementes:children]
+app

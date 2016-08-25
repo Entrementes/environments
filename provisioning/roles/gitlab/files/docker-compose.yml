@@ -8,5 +8,5 @@ web:
     - '5443:443'
   volumes:
     - './config:/etc/gitlab'
-    - '/application-logs:/var/log/gitlab'
+    - '/application-logs/gitlab:/var/log/gitlab'
     - '/git-repositories:/var/opt/gitlab'

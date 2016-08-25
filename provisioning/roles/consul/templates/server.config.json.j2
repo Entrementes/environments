@@ -1,0 +1,11 @@
+{ 
+	"datacenter": "entrementes",
+	"node_name": "{{ inventory_hostname.split('.')[0] }}",
+	"bootstrap": false,
+	"server": true,
+	"data_dir": "{{ consul_storage.path }}",
+	"log_level": "INFO",
+	"enable_syslog": true,
+	"bind_addr": "{{ ansible_enp0s8['ipv4']['address'] }}",
+	"advertise_addr": "{{ ansible_enp0s8['ipv4']['address'] }}"
+}

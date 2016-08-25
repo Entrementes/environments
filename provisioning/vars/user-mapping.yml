@@ -1,0 +1,16 @@
+users:
+  system:
+    name: senpai
+    id: 710
+  maintenance:
+    name: kouhai
+    id: 720
+  container_registry:
+    name: docker-registry
+    id: 810
+  repository:
+    name: gitlab
+    id: 820
+  service_discovery:
+    name: consul
+    id: 830

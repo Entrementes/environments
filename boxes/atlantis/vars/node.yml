@@ -1,0 +1,4 @@
+node_name: atlantis
+node_size: 512mb
+node_volumes:
+  - { size: 1, name: "{{ node_name }}-logs", description: "Log Archives"}

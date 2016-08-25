@@ -1,0 +1,22 @@
+---
+- name: Configure Insecure Registry
+  file:
+    path: "/etc/systemd/system/docker.service.d/"
+    state: directory
+  notify: Restart Docker
+
+- name: Update Docker Configuration
+  copy:
+    src: "docker.conf"
+    dest: "/etc/systemd/system/docker.service.d/docker.conf"
+  notify: Restart Docker
+
+- name: Update Docker Configuration
+  copy:
+    src: docker
+    dest: "/etc/default/docker"
+  notify: Restart Docker
+
+- name: Update sysctl
+  shell: "systemctl daemon-reload"
+  notify: Restart Docker

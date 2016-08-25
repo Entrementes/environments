@@ -4,17 +4,39 @@ localhost ansible_connection=local
 [build]
 constantinopla.entrementes.org
 
-# [app]
-# atlantis.entrementes.org
+[service-discovery]
+macondo1.entrementes.org
+macondo2.entrementes.org
+macondo3.entrementes.org
 
-# [log]
-# alexandria.entrementes.org
+[proxy]
+zerzura.entrementes.org
 
-# [database]
-# babilonia.entrementes.org
+[app]
+atlantis.entrementes.org
+
+[log]
+alexandria.entrementes.org
+
+[database]
+eldorado.entrementes.org
+
+[queue]
+thinis1.entrementes.org
+thinis2.entrementes.org
+thinis3.entrementes.org
+
+[cache]
+shambhala1.entrementes.org
+shambhala2.entrementes.org
+shambhala3.entrementes.org
 
 [entrementes:children]
 build
-# app
-# log
-# database
+service_discovery
+proxy
+app
+log
+database
+queue
+cache

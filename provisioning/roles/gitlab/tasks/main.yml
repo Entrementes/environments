@@ -1,38 +1,75 @@
 ---
-- name: Check registry path
-  stat: path=/gitlab
-  register: gitlab_home
+- name: Create Gitlab group
+  group: 
+    name: "{{ users.repository.name }}"
+    gid: "{{ users.repository.id }}" 
+    state: present
 
-- name: Prepare Docker Registry Storage
+- name: Create Gitlab user
+  user: 
+    name: "{{ users.repository.name }}"
+    uid: "{{ users.repository.id }}" 
+    group: "{{ users.repository.name }}" 
+    comment: "The Gitlab user"
+    shell: "/bin/bash"
+
+- name: Add Gitlab user to docker group
+  user: 
+    name: "{{ users.repository.name }}"
+    groups: docker 
+    append: yes
+
+- name: Prepare Gitlab Directory Structure
   file:
-    path: /gitlab/{{ item }}
+    path: "/gitlab/{{ item }}"
     state: directory
-    mode: 750
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.repository.name }}"
+    group: "{{ users.repository.name }}"
   with_items:
     - repos
-    - logs
     - config
-  when: not gitlab_home.stat.exists
+
+- name: Prepare Gitlab Log Directory
+  file:
+    path: "/application-logs/gitlab"
+    state: directory
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.repository.name }}"
+    group: "{{ users.repository.name }}"
+
+- name: Change Storage Ownership
+  file:
+    path: /git-repositories
+    state: directory
+    mode: "u=rwx,g=rx"
+    owner: "{{ users.repository.name }}"
+    group: "{{ users.repository.name }}"
 
 - name: Add Gitlab extra files
   copy:
-    src: '{{ item.file }}'
-    dest: '/gitlab/{{ item.sub_path }}'
+    src: "{{ item.file }}"
+    dest: "/gitlab/{{ item.sub_path }}"
+    mode: "u=rw,g=r"
+    owner: "{{ users.repository.name }}"
+    group: "{{ users.repository.name }}"
   with_items:
-    - { sub_path: '' , file: 'docker-compose.yml' }
+    - { sub_path: "" , file: "docker-compose.yml" }
   notify: Start Gitlab
 
 - name: Add Gitlab extra templates
   template:
-    src: '{{ item.file }}.j2'
-    dest: '/gitlab/{{ item.sub_path }}/{{ item.file }}'
+    src: "{{ item.file }}.j2"
+    dest: "/gitlab/{{ item.sub_path }}/{{ item.file }}"
+    mode: "u=rw,g=r"
+    owner: "{{ users.repository.name }}"
+    group: "{{ users.repository.name }}"
   with_items:
-    - { sub_path: 'config' , file: 'gitlab.rb' }
+    - { sub_path: "config" , file: "gitlab.rb" }
   notify: Start Gitlab
 
 - name: Add init scripts
   copy:
-    src: gitlab-container.service
-    dest: /lib/systemd/system/gitlab-container.service
+    src: "gitlab-container.service"
+    dest: "/lib/systemd/system/gitlab-container.service"
   notify: Start Gitlab
-
