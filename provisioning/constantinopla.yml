@@ -3,12 +3,14 @@
   remote_user: senpai
   become: yes
   vars_files:
+    - vars/env.vagrant.yml
+#    - vars/env.digital_ocean.yml
     - vars/secret.yml
     - vars/user-mapping.yml
   roles:
-    - { role: lvm, lvm_dev: '/dev/sdd', lvm_path: '/application-logs' }
-    - { role: lvm, lvm_dev: '/dev/sdb', lvm_path: '/container-registry' }
-    - { role: lvm, lvm_dev: '/dev/sdc', lvm_path: '/git-repositories' }
+    - { role: lvm, lvm_dev: "{{ env.disk1 }}", lvm_path: '/application-logs' }
+    - { role: lvm, lvm_dev: "{{ env.disk2 }}", lvm_path: '/container-registry' }
+    - { role: lvm, lvm_dev: "{{ env.disk3 }}", lvm_path: '/git-repositories' }
     - { role: swap }
     - { role: sys-monitoring }
     - { role: python }

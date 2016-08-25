@@ -1,0 +1,33 @@
+---
+- name: Install SYS Packages
+  apt:
+    pkg: "{{ item }}"
+    state: present
+    force: yes
+  with_items:
+    - git
+
+- name: Check if GUI is installed
+  stat:
+    path: "/home/{{ users.service_discovery.name }}/ui"
+  register: gui_directory
+
+- name: Clone Consul Source (Structure Only)
+  shell: "git clone --depth 1 https://github.com/hashicorp/consul.git ui"
+  args:
+    chdir: "/home/{{ users.service_discovery.name }}"
+  when: not gui_directory.stat.exists
+
+- name: Fetch only [ui] subdirectory
+  shell: git filter-branch --prune-empty --subdirectory-filter ui HEAD
+  args:
+    chdir: "/home/{{ users.service_discovery.name }}/ui"
+  when: not gui_directory.stat.exists
+
+- name: Set Permissions for GUI files
+  file:
+    path: "/home/{{ users.service_discovery.name }}/ui"
+    state: directory
+    recurse: yes
+    owner: "{{ users.service_discovery.name }}"
+    group: "{{ users.service_discovery.name }}"

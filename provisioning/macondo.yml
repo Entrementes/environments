@@ -3,10 +3,13 @@
   become: yes
   gather_facts: true
   vars_files:
-    # - vars/secret.yml
+    - vars/env.vagrant.yml
+#    - vars/env.digital_ocean.yml
+#    - vars/secret.yml
     - vars/user-mapping.yml
   roles:
     - { role: swap }
     - { role: sys-monitoring }
     - { role: python }
-    - { role: consul }
+    - { role: consul, tasks: consul-server }
+    - { role: consul, tasks: consul-gui }

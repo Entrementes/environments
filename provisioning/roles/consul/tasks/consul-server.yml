@@ -1,0 +1,93 @@
+---
+- name: Aggregate Consul Cluster IPs
+  set_fact:
+    cluster_node: "{{ hostvars[item][env['network_interface']]['ipv4']['address'] }}"
+  with_items: "{{ groups['service-discovery'] }}"
+  register: aggregated_node_ips
+
+- name: Select Consul Cluster IPs
+  set_fact:
+    consul_cluster: "{{ aggregated_node_ips.results | map(attribute='ansible_facts.cluster_node') | list | default([])}}"
+
+- name: Consul Cluster members are...
+  run_once: yes
+  debug:
+    msg: "{{ consul_cluster }}"
+
+- name: Create Consul Group
+  group:
+    name: "{{ users.service_discovery.name }}"
+    gid: "{{ users.service_discovery.id }}"
+    state: present
+
+- name: Create Consul User
+  user:
+    name: "{{ users.service_discovery.name }}"
+    uid: "{{ users.service_discovery.id }}"
+    group: "{{ users.service_discovery.name }}"
+    comment: The Consul user
+    shell: "/bin/bash"
+
+- name: Fetch Consul Binaries
+  unarchive:
+    src: "https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip"
+    dest: "/usr/bin/"
+    copy: no
+    mode: 755
+
+- name: Create Consul Configuration Directory
+  file:
+    dest: "/etc/consul.d/{{ item }}"
+    state: directory
+  with_items:
+    - bootstrap
+    - server
+
+- name: Create Storage Directory
+  file:
+    dest: "/var/consul/"
+    state: directory
+    owner: "{{ users.service_discovery.name }}"
+    group: "{{ users.service_discovery.name }}"
+  register: consul_storage
+
+- name: Create Storage Directory is...
+  debug:
+    msg: "{{ consul_storage.path }}"
+
+- name: Add consul configuration file
+  template:
+    src: "{{ item.file }}.j2"
+    dest: "/etc/consul.d/{{ item.sub_path }}/{{ item.dest_file }}"
+  with_items:
+    - { sub_path: "bootstrap", file: "bootstrap.config.json", dest_file: "config.json"  }
+    - { sub_path: "server", file: "server.config.json", dest_file: "config.json"  }
+
+- name: Add init scripts
+  copy:
+    src: "{{ item }}"
+    dest: "/lib/systemd/system/{{ item }}"
+  with_items:
+    - consul-server.service
+    - consul-master.service
+  notify: Restart sysclt daemon
+
+- name: Start Consul Master Node
+  run_once: yes
+  service:
+    name: consul-master
+    state: started
+    enabled: yes
+
+- name: Check if is Master Node
+  command: systemctl status consul-master
+  ignore_errors: yes
+  changed_when: false
+  register: service_master_status
+
+- name: Start Consul Server Node
+  service:
+    name: consul-server
+    state: started
+    enabled: yes
+  when: service_master_status.rc != 0
