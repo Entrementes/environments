@@ -2,8 +2,6 @@
 
 ### Requirements:
 
-Tested with:
-
 Package | Version 
 ------|-------
 Python | 2.7.10 
