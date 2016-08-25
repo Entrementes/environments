@@ -2,7 +2,10 @@
 
 ### Local Build:
 
+```
 $ environments/boxes/constantinopla/vagrant { up, provision, destroy }
+```
+> map your built nodes on your /etc/hosts
 
 ### Digital Ocean:
 ##### Build
@@ -13,7 +16,7 @@ $ environments/boxes/constantinopla/ansible-playbook build.digital_ocean.yml --a
 
 #### Bootstrap/Provision
 
-> map your nodes on your /etc/hosts
+> map your built nodes on your /etc/hosts
 
 ```
 $ environments/boxes/constantinopla/ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
