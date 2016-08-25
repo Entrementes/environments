@@ -22,13 +22,13 @@ $ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.atlantis
 ```
 $ cd environments/boxes/atlantis/
 $ ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.atlantis
-$ ansible-playbook provisioning/constantinopla.yml --ask-vault-pass -i hosts.atlantis
+$ ansible-playbook provisioning/atlantis.yml --ask-vault-pass -i hosts.atlantis
 ```
 
 #### Control
 
 ```
-$ cd environments/boxes/constantinopla/
+$ cd environments/boxes/atlantis/
 $ export DO_TOKEN=<< YOR DIGITAL OCEAN API TOKEN >>
 $ python ../../toolkit/digitalocean_cli.py -n atlantis.info.yml -a start
 $ python ../../toolkit/digitalocean_cli.py -n atlantis.info.yml -a stop
