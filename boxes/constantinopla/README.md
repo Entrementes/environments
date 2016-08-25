@@ -3,7 +3,8 @@
 ### Local Build:
 
 ```
-$ environments/boxes/constantinopla/vagrant { up, provision, destroy }
+$ cd environments/boxes/constantinopla/
+$ vagrant { up, provision, destroy }
 ```
 > map your built nodes on your /etc/hosts
 
@@ -11,21 +12,24 @@ $ environments/boxes/constantinopla/vagrant { up, provision, destroy }
 ##### Build
 
 ```
-$ environments/boxes/constantinopla/ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
+$ cd environments/boxes/constantinopla/
+$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
 ```
 > map your built nodes on your /etc/hosts
 
 #### Bootstrap/Provision
 
 ```
-$ environments/boxes/constantinopla/ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
-$ environments/boxes/constantinopla/ansible-playbook provisioning/constantinopla.yml --ask-vault-pass -i hosts.constantinopla
+$ cd environments/boxes/constantinopla/
+$ ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
+$ ansible-playbook provisioning/constantinopla.yml --ask-vault-pass -i hosts.constantinopla
 ```
 
 #### Control
 
 ```
 $ cd environments/boxes/constantinopla/
+$ export DO_TOKEN=<< YOR DIGITAL OCEAN API TOKEN >>
 $ python ../../toolkit/digitalocean_cli.py -n constantinopla.info.yml -a start
 $ python ../../toolkit/digitalocean_cli.py -n constantinopla.info.yml -a stop
 $ python ../../toolkit/digitalocean_cli.py -n constantinopla.info.yml -a delete
