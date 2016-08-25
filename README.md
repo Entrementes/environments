@@ -4,7 +4,7 @@
 
 Tested with:
 
-Teste | Teste 
+Package | Version 
 ------|-------
 Python | 2.7.10 
 Vagrant | 1.8.4
