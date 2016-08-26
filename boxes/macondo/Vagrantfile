@@ -8,7 +8,7 @@ Vagrant.configure(2) do |config|
   node_count = 3
 
   node_count.times do |index|
-    config.vm.define "macondo#{index + 1}.entrementes.org" do |macondo|
+    config.vm.define "macondo#{index + 1}" do |macondo|
       macondo.vm.hostname = "macondo#{index + 1}"
       macondo.vm.network :private_network, ip: "192.168.171.3#{index + 1}"
       macondo.vm.network :forwarded_port, guest: 8300, host: "83#{index + 1}0"
@@ -22,7 +22,7 @@ Vagrant.configure(2) do |config|
   
   #Common Setup
   config.vm.provision :ansible do |ansible|
-    ansible.playbook = "provisioning/bootstrap.vagrant.yml"
+    ansible.playbook = "provisioning/bootstrap/bootstrap.vagrant.yml"
     ansible.inventory_path ="./hosts.macondo"
     ansible.limit = "all"
     ansible.sudo = true
@@ -30,10 +30,11 @@ Vagrant.configure(2) do |config|
 
   #Host Specific
   config.vm.provision :ansible do |ansible|
-    ansible.playbook = "provisioning/macondo.yml"
+    ansible.playbook = "provisioning/blueprints/macondo.yml"
     ansible.inventory_path ="./hosts.macondo"
     ansible.limit = "all"
     ansible.sudo = true
+    ansible.extra_vars = { env_file: '../vars/env.vagrant.yml' }
     # ansible.raw_arguments = "--ask-vault-pass"
   end
 end

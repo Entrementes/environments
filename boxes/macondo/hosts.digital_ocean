@@ -2,9 +2,9 @@
 localhost ansible_connection=local
 
 [service-discovery]
-macondo1.entrementes.org
-macondo2.entrementes.org
-macondo3.entrementes.org
+macondo1.do.entrementes.org
+macondo2.do.entrementes.org
+macondo3.do.entrementes.org
 
 [entrementes:children]
 service-discovery

@@ -66,8 +66,9 @@
 
 - name: Add hosts mapping
   template:
-    src: hosts.j2
+    src: "hosts.{{ env.type }}.j2"
     dest: /etc/hosts
+  when: env['add_hosts']
 
 - name: Update APT repo
   apt: 

@@ -1,12 +1,10 @@
 ---
 - hosts: app
-  remote_user: senpai
+  remote_user: "{{ users.system.name }}"
   become: yes
   vars_files:
-    - vars/env.vagrant.yml
-#    - vars/env.digital_ocean.yml
-#    - vars/secret.yml
     - vars/user-mapping.yml
+    - "{{ env_file }}"
   roles:
     - { role: lvm, lvm_dev: "{{ env.disk1 }}", lvm_path: '/application-logs' }
     - { role: swap }

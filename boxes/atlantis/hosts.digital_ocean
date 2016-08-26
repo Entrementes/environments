@@ -1,9 +1,8 @@
 [localhost]
 localhost ansible_connection=local
 
-[build]
-constantinopla.entrementes.org
+[app]
+atlantis.do.entrementes.org
 
 [entrementes:children]
-build
-
+app

@@ -1,0 +1,9 @@
+---
+- hosts: entrementes
+  gather_facts: False
+  remote_user: root
+  vars_files:
+    - ../vars/env.digital_ocean.yml
+    - ../vars/user-mapping.yml
+  tasks:
+    - include: bootstrap.yml

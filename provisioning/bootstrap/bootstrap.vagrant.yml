@@ -3,6 +3,7 @@
   gather_facts: False
   remote_user: root
   vars_files:
-    - vars/user-mapping.yml
+    - ../vars/env.vagrant.yml
+    - ../vars/user-mapping.yml
   tasks:
     - include: bootstrap.yml
