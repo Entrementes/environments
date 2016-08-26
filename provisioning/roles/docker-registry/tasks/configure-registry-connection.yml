@@ -12,8 +12,8 @@
   notify: Restart Docker
 
 - name: Update Docker Configuration
-  copy:
-    src: docker
+  template:
+    src: docker_opts.j2
     dest: "/etc/default/docker"
   notify: Restart Docker
 
