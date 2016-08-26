@@ -4,7 +4,7 @@
 
 ```
 $ cd environments/boxes/macondo/
-$ vagrant { up --no-provision, provision macondo1.entrementes.org, destroy }
+$ vagrant { up --no-provision, provision macondo1, destroy }
 ```
 > map your built nodes on your /etc/hosts
 
@@ -13,7 +13,7 @@ $ vagrant { up --no-provision, provision macondo1.entrementes.org, destroy }
 
 ```
 $ cd environments/boxes/macondo/
-$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.macondo
+$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 > map your built nodes on your /etc/hosts
 
@@ -21,8 +21,8 @@ $ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.macondo
 
 ```
 $ cd environments/boxes/macondo/
-$ ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.macondo
-$ ansible-playbook provisioning/macondo.yml --ask-vault-pass -i hosts.macondo
+$ ansible-playbook provisioning/bootstrap/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
+$ ansible-playbook provisioning/blueprints/macondo.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 
 #### Control

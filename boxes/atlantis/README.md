@@ -13,7 +13,7 @@ $ vagrant { up, provision, destroy }
 
 ```
 $ cd environments/boxes/atlantis/
-$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.atlantis
+$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 > map your built nodes on your /etc/hosts
 
@@ -21,8 +21,8 @@ $ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.atlantis
 
 ```
 $ cd environments/boxes/atlantis/
-$ ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.atlantis
-$ ansible-playbook provisioning/atlantis.yml --ask-vault-pass -i hosts.atlantis
+$ ansible-playbook provisioning/bootstrap/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
+$ ansible-playbook provisioning/blueprints/atlantis.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 
 #### Control

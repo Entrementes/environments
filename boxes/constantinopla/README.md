@@ -13,7 +13,7 @@ $ vagrant { up, provision, destroy }
 
 ```
 $ cd environments/boxes/constantinopla/
-$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
+$ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 > map your built nodes on your /etc/hosts
 
@@ -21,8 +21,8 @@ $ ansible-playbook build.digital_ocean.yml --ask-vault-pass -i hosts.constantino
 
 ```
 $ cd environments/boxes/constantinopla/
-$ ansible-playbook provisioning/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.constantinopla
-$ ansible-playbook provisioning/constantinopla.yml --ask-vault-pass -i hosts.constantinopla
+$ ansible-playbook provisioning/bootstrap/bootstrap.digital_ocean.yml --ask-vault-pass -i hosts.digital_ocean
+$ ansible-playbook provisioning/blueprints/constantinopla.yml --ask-vault-pass -i hosts.digital_ocean
 ```
 
 #### Control
