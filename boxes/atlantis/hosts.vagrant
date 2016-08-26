@@ -2,7 +2,7 @@
 localhost ansible_connection=local
 
 [app]
-atlantis.vagrant.entrementes.org
+atlantis.va.entrementes.org
 
 [entrementes:children]
 app

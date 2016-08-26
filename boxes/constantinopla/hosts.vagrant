@@ -2,7 +2,7 @@
 localhost ansible_connection=local
 
 [build]
-constantinopla.vagrant.entrementes.org
+constantinopla.va.entrementes.org
 
 [entrementes:children]
 build
