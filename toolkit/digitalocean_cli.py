@@ -45,7 +45,7 @@ def get_command_line_parser():
     parser.add_option('-a', '--action', dest='action', help='the action to be performed on a digital ocean node',
                       choices=['status', 'start', 'stop', 'snapshot', 'delete'])
     parser.add_option('-v', '--verbose', action="store_true", dest="verbose")
-    parser.add_option('-x','--extra', dest="extra",
+    parser.add_option('-x', '--extra', dest="extra",
                       help='JSON formatted dictionary of extra arguments for specific action')
 
     return parser
