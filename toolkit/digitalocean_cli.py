@@ -75,7 +75,7 @@ def _GET(action, url, extra_args, volumes, debug=False):
         data = dump.dump_all(resp)
         print(data.decode('utf-8'))
 
-    return json.dumps(resp.json()['droplet'], indent=2)
+    return resp
 
 
 def _POST(action, url, extra_args, volumes, debug=False):
@@ -90,31 +90,53 @@ def _POST(action, url, extra_args, volumes, debug=False):
         "Content-Type": "application/json"
     }
     full_url = "{0}{1}".format(url, action['uri-postfix'])
-    print("{0} -> {1}".format(action['type'], full_url))
+    # print("{0} -> {1}".format(action['type'], full_url))
     resp = requests.post(full_url, json=payload, headers=headers)
     if debug:
         data = dump.dump_all(resp)
         print(data.decode('utf-8'))
 
+    return resp
+
 
 def _DELETE(action, url, extra_args, volumes, debug=False):
     full_url = "{0}{1}".format(url, action['uri-postfix'])
-    __http_delete(full_url, debug)
+    resp = __http_delete(full_url, debug)
 
     for volume in volumes:
         full_url = "{0}{1}".format(volume, action['uri-postfix'])
         __http_delete(full_url, debug)
+
+    return resp
 
 
 def __http_delete(full_url, debug):
     headers = {
         "Authorization": "Bearer {0}".format(DO_TOKEN),
     }
-    print("{0} -> {1}".format(action['type'], full_url))
+    # print("{0} -> {1}".format(action['type'], full_url))
     resp = requests.delete(full_url, headers=headers)
     if debug:
         data = dump.dump_all(resp)
         print(data.decode('utf-8'))
+
+    return resp
+
+
+def client_call(info, action_name, extra_args, debug):
+    action = available_actions[action_name]
+
+    extra_json = None
+    if action['extra-args']:
+        extra_json = json.loads(extra_args)
+
+    for node in info['nodes']:
+        result = globals()[action['method']](action, node['url'], extra_json, node['volumes'], debug)
+        json_response = result.json()
+        if 'droplet' in json_response:
+            print(json.dumps(json_response['droplet'], indent=2))
+        elif 'action' in json_response:
+            print(json.dumps(json_response['action'], indent=2))
 
 
 if __name__ == '__main__':
@@ -123,15 +145,10 @@ if __name__ == '__main__':
         parser = get_command_line_parser()
         (options, args) = parser.parse_args()
         validate_user_options(parser, options)
-        configuration = load_node_info(options.node)
-        action = available_actions[options.action]
-        
-        extra_args = None
-        if action['extra-args']:
-            extra_args = json.loads(options.extra)
-        for node in configuration['nodes']:
-            result = locals()[action['method']](action, node['url'], extra_args, node['volumes'], options.verbose)
-            print(result)
+        info = load_node_info(options.node)
+        extra_args = options.extra
+
+        client_call(info, options.action, extra_args, options.verbose)
         
         exit(0)
     except OptionError as opt_error:
