@@ -106,3 +106,6 @@ ENV/
 
 ## IDE ##
 .idea/
+
+## App specific Info
+*.info.yml

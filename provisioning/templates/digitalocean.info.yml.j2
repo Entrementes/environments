@@ -1,0 +1,10 @@
+---
+nodes:
+{% for droplet in selected_nodes %}
+  - name: {{ droplet.node }}
+    url: https://api.digitalocean.com/v2/droplets/{{ droplet.id }}
+    volumes:
+{% for volume in droplet.volumes %}
+      - https://api.digitalocean.com/v2/volumes/{{ volume }}
+{% endfor %}
+{% endfor %}

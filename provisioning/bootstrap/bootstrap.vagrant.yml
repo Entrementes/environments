@@ -7,3 +7,8 @@
     - ../vars/user-mapping.yml
   tasks:
     - include: bootstrap.yml
+
+    - name: Add hosts mapping
+      template:
+        src: "hosts.{{ env.type }}.j2"
+        dest: /etc/hosts

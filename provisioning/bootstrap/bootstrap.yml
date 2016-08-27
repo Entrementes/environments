@@ -64,12 +64,6 @@
     key: "{{ lookup('file', item) }}"
   with_fileglob: "~/.ssh/*.pub"
 
-- name: Add hosts mapping
-  template:
-    src: "hosts.{{ env.type }}.j2"
-    dest: /etc/hosts
-  when: env['add_hosts']
-
 - name: Update APT repo
   apt: 
     update_cache: yes
