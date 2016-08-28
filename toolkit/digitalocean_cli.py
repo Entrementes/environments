@@ -6,6 +6,7 @@ import requests
 from requests_toolbelt.utils import dump
 import os
 import json
+import logging
 
 DO_TOKEN = os.environ["DO_TOKEN"]
 
@@ -24,8 +25,7 @@ available_actions = {
         "method": "_POST",
         "type": "power_off",
         "extra-args": [],
-        "uri-postfix":
-        "/actions"},
+        "uri-postfix": "/actions"},
     "snapshot": { 
         "method": "_POST",
         "type": "snapshot",
@@ -37,6 +37,13 @@ available_actions = {
         "extra-args": [],
         "uri-postfix": ""}
 }
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+stdout = logging.StreamHandler()
+stdout.setLevel(logging.INFO)
+
+logger.addHandler(stdout)
 
 
 def get_command_line_parser():
@@ -90,7 +97,6 @@ def _POST(action, url, extra_args, volumes, debug=False):
         "Content-Type": "application/json"
     }
     full_url = "{0}{1}".format(url, action['uri-postfix'])
-    # print("{0} -> {1}".format(action['type'], full_url))
     resp = requests.post(full_url, json=payload, headers=headers)
     if debug:
         data = dump.dump_all(resp)
@@ -103,9 +109,11 @@ def _DELETE(action, url, extra_args, volumes, debug=False):
     full_url = "{0}{1}".format(url, action['uri-postfix'])
     resp = __http_delete(full_url, debug)
 
-    for volume in volumes:
-        full_url = "{0}{1}".format(volume, action['uri-postfix'])
-        __http_delete(full_url, debug)
+    if volumes:
+
+        for volume in volumes:
+            full_url = "{0}{1}".format(volume, action['uri-postfix'])
+            __http_delete(full_url, debug)
 
     return resp
 
@@ -114,11 +122,10 @@ def __http_delete(full_url, debug):
     headers = {
         "Authorization": "Bearer {0}".format(DO_TOKEN),
     }
-    # print("{0} -> {1}".format(action['type'], full_url))
     resp = requests.delete(full_url, headers=headers)
     if debug:
         data = dump.dump_all(resp)
-        print(data.decode('utf-8'))
+        logger.info(data.decode('utf-8'))
 
     return resp
 
@@ -126,17 +133,34 @@ def __http_delete(full_url, debug):
 def client_call(info, action_name, extra_args, debug):
     action = available_actions[action_name]
 
+    node_calls = []
+
     extra_json = None
     if action['extra-args']:
         extra_json = json.loads(extra_args)
 
     for node in info['nodes']:
         result = globals()[action['method']](action, node['url'], extra_json, node['volumes'], debug)
-        json_response = result.json()
-        if 'droplet' in json_response:
-            print(json.dumps(json_response['droplet'], indent=2))
-        elif 'action' in json_response:
-            print(json.dumps(json_response['action'], indent=2))
+
+        if result.ok:
+            if result.text:
+                json_response = result.json()
+                if 'droplet' in json_response:
+                    logger.info(json.dumps(json_response['droplet'], indent=2))
+                elif 'action' in json_response:
+                    logger.info(json.dumps(json_response['action'], indent=2))
+            else:
+                logger.info(json.dumps({'message': 'ok'}, indent=2))
+
+            node_calls.append(True)
+
+        else:
+            json_response = result.json()
+            logger.info(json.dumps(json_response, indent=2))
+
+            node_calls.append(False)
+
+    return all(node_calls)
 
 
 if __name__ == '__main__':
@@ -148,12 +172,16 @@ if __name__ == '__main__':
         info = load_node_info(options.node)
         extra_args = options.extra
 
-        client_call(info, options.action, extra_args, options.verbose)
-        
-        exit(0)
+        call_result = client_call(info, options.action, extra_args, options.verbose)
+
+        if call_result:
+            exit(0)
+        else:
+            exit(1)
+
     except OptionError as opt_error:
-        print(opt_error)
-        exit(1)
+        logger.error(opt_error)
+        exit(2)
     except IOError as io:
-        print(io)
-        exit(1)
+        logger.error(io)
+        exit(3)
