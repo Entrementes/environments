@@ -1,0 +1,118 @@
+- hosts: localhost
+  gather_facts: False
+  vars_files:
+    - vars/node.yml
+    - provisioning/vars/secret.yml
+    - provisioning/vars/digital_ocean.yml
+  tasks:
+
+    - name: Retrieve SSH keys
+      uri:
+        url: https://api.digitalocean.com/v2/account/keys
+        method: GET
+        follow_redirects: all
+        HEADER_Authorization: Bearer {{ digital_ocean.token }}
+        return_content: yes
+      register: do_keys
+
+    - name: Select Keys
+      set_fact:
+        selected_ssh_keys: "{{ ( do_keys['json']['ssh_keys'] | map(attribute='id') | list )}}"
+      when: do_ssh_pub_key in ( do_keys["json"]["ssh_keys"] | map(attribute="public_key") | list )
+
+    - name: Selected Keys are...
+      debug:
+        msg: "{{ selected_ssh_keys }}"
+
+    - name: Set node sequence
+      set_fact:
+        node_sequence: "{{ range( 1, node_count + 1) | list }}"
+      when: node_count is defined
+
+    - name: List Volumes
+      uri:
+        url: https://api.digitalocean.com/v2/volumes
+        method: GET
+        follow_redirects: all
+        HEADER_Authorization: Bearer {{ digital_ocean.token }}
+        return_content: yes
+      register: do_current_volumes
+      when: node_volumes is defined
+
+    - name: Check Availability
+      fail:
+        msg: "Naming conflicts found on volumes"
+      when: >
+        (node_volumes is defined) 
+        and (node_count is defined | 
+          ternary(item[0]['name'].replace('-', item[1] | string + '-'),item[0]['name']) 
+        in (do_current_volumes['json']['volumes'] | map(attribute='name') | list ))
+      with_nested: 
+        - "{{ node_volumes | default([]) }}"
+        - "{{ node_sequence | default([0]) }}"
+
+    - name: Create Volumes
+      uri:
+        url: https://api.digitalocean.com/v2/volumes
+        method: POST
+        HEADER_Authorization: Bearer {{ digital_ocean.token }}
+        HEADER_Content-Type: application/json
+        return_content: yes
+        status_code: 201
+        body_format: json
+        body: '{ "size_gigabytes": {{ item[0].size }}, "name": "{{ node_count is defined | ternary(item[0].name.replace("-", item[1] | string + "-"), item[0].name) }}", "description": "{{ item[0].description }}", "region": "{{ do_region }}"}'
+      with_nested: 
+        - "{{ node_volumes | default([]) }}"
+        - "{{ node_sequence | default([0]) }}"
+      register: do_volumes
+      when: node_volumes is defined
+
+    - name: Prepare Created Volumes Info
+      set_fact:
+        selected_volume: { node: "{{ item.name.split('-')[0]}}", volume_id: "{{ item.id }}" }
+      with_items: 
+        - "{{ ( do_volumes['results'] | map(attribute='json.volume') | list ) }}"
+      register: aggregated_volume_info
+      when: node_volumes is defined
+
+    - name: Select Created Volumes
+      set_fact:
+        selected_volumes: "{{ aggregated_volume_info.results | map(attribute='ansible_facts.selected_volume') | list | default([])}}"
+
+    - name: Selected Volumes are...
+      debug:
+        msg: "{{ selected_volumes }}"
+
+    - name: Create Node
+      uri:
+        url: https://api.digitalocean.com/v2/droplets
+        method: POST
+        HEADER_Authorization: Bearer {{ digital_ocean.token }}
+        HEADER_Content-Type: application/json
+        return_content: yes
+        status_code: 202
+        body_format: json
+        body: '{ "name": "{{ (node_count is defined | ternary( node_name + item | string, node_name)) }}", "region":"{{ do_region }}","size":"{{ do_size }}","image":"{{ do_image }}","ssh_keys":{{ selected_ssh_keys }},"backups":false,"ipv6":false,"user_data":null,"private_networking":null,"volumes": {{ selected_volumes | selectattr("node", "equalto", (node_count is defined | ternary( node_name + item | string, node_name))) | map(attribute="volume_id") | list }} }'
+      with_items: "{{ node_sequence | default([0]) }}"
+      register: do_nodes
+
+    - name: Prepare Created Nodes Info
+      set_fact:
+        selected_node: { node: "{{ item.name }}", id: "{{ item.id }}", volumes: "{{ selected_volumes | selectattr('node', 'equalto', item.name ) | map(attribute='volume_id') | list }}" }
+      with_items: 
+        - "{{ ( do_nodes['results'] | map(attribute='json.droplet') | list ) }}"
+      register: aggregated_node_info
+
+    - name: Select Created Nodes
+      set_fact:
+        selected_nodes: "{{ aggregated_node_info.results | map(attribute='ansible_facts.selected_node') | list }}"
+
+    - name: Selected Nodes are...
+      debug:
+        msg: "{{ selected_nodes }}"
+
+    - name: Generate creation report
+      template:
+        src: 'provisioning/templates/digitalocean.info.yml.j2'
+        dest: './digitalocean.info.yml'
+

@@ -1,0 +1,26 @@
+- hosts: localhost
+  gather_facts: False
+  become: yes
+  become_user: root
+  vars_files:
+    - vars/node.yml
+    - provisioning/vars/secret.yml
+    - provisioning/vars/digital_ocean.yml
+  tasks:
+
+    - name: Register hosts mapping
+      blockinfile:
+        dest: /etc/hosts
+        marker: "# {mark} ANSIBLE MANAGED BLOCK: {{ node_name }}"
+        block: |
+          {{ lookup('file', './host_mapping') }}
+      tags: ['map_hosts']
+
+    - name: Unregister hosts mapping
+      blockinfile:
+        dest: /etc/hosts
+        state: absent
+        marker: "# {mark} ANSIBLE MANAGED BLOCK: {{ node_name }}"
+        block: |
+          {{ lookup('file', './host_mapping') }}
+      tags: ['unmap_hosts']
