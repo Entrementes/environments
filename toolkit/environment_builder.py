@@ -5,7 +5,7 @@ import time
 import logging
 from optparse import OptionParser, OptionError
 
-from digitalocean_cli import client_call, load_node_info
+from toolkit.digitalocean_cli import client_call, load_node_info
 
 __author__ = 'gunisalvo'
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env python2.7
 
-__author__ = 'gunisalvo'
-
 import yaml
 from optparse import OptionParser, OptionError
 import requests
 from requests_toolbelt.utils import dump
-import os
 import json
 import logging
+import os
+
+__author__ = 'gunisalvo'
 
 DO_TOKEN = os.environ["DO_TOKEN"]
 
