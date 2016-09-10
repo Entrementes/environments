@@ -7,15 +7,3 @@
     - ../vars/user-mapping.yml
   tasks:
     - include: bootstrap.yml
-
-    - name: Get static host mappings
-      set_fact:
-        static_hosts_mapping: "{{ lookup('file', 'files/hosts.digital_ocean') }}"
-
-    - name: ...
-      debug:
-        msg: "{{ static_hosts_mapping }}"
-
-    - name: Add hosts mapping (localhost)
-      run_once: yes
-      local_action: blockinfile dest=/etc/hosts insertafter="Below*" marker="<!-- {mark} ANSIBLE MANAGED BLOCK -->" block="{{ static_hosts_mapping }}"

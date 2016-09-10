@@ -1,5 +1,7 @@
 #!/usr/bin/env python2.7
 
+__author__ = 'gunisalvo'
+
 import yaml
 from optparse import OptionParser, OptionError
 import requests
@@ -130,10 +132,11 @@ def __http_delete(full_url, debug):
     return resp
 
 
-def client_call(info, action_name, extra_args, debug):
+def client_call(info, action_name, extra_args={}, debug=False):
     action = available_actions[action_name]
 
     node_calls = []
+    response_bodies = []
 
     extra_json = None
     if action['extra-args']:
@@ -149,8 +152,11 @@ def client_call(info, action_name, extra_args, debug):
                     logger.info(json.dumps(json_response['droplet'], indent=2))
                 elif 'action' in json_response:
                     logger.info(json.dumps(json_response['action'], indent=2))
+                response_bodies.append(json_response)
             else:
-                logger.info(json.dumps({'message': 'ok'}, indent=2))
+                json_response = {'message': 'ok'}
+                logger.info(json.dumps(json_response, indent=2))
+                response_bodies.append(json_response)
 
             node_calls.append(True)
 
@@ -159,8 +165,9 @@ def client_call(info, action_name, extra_args, debug):
             logger.info(json.dumps(json_response, indent=2))
 
             node_calls.append(False)
+            response_bodies.append(json_response)
 
-    return all(node_calls)
+    return all(node_calls), response_bodies
 
 
 if __name__ == '__main__':
@@ -172,7 +179,7 @@ if __name__ == '__main__':
         info = load_node_info(options.node)
         extra_args = options.extra
 
-        call_result = client_call(info, options.action, extra_args, options.verbose)
+        call_result, payloads = client_call(info, options.action, extra_args, options.verbose)
 
         if call_result:
             exit(0)

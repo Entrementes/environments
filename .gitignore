@@ -109,3 +109,6 @@ ENV/
 
 ## App specific Info
 *.info.yml
+.DS_Store
+secret.yml
+host_mapping

@@ -1,3 +1,4 @@
 node_name: macondo
+node_type: service-discovery
 node_size: 512mb
 node_count: 3
