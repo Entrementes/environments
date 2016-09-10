@@ -8,4 +8,5 @@ setup(
     author="Rodrigo 'Gunisalvo' Leite",
     author_email="gunisalvo@gmail.com",
     description="DevOps playground helper scripts.",
+    url="https://github.com/Entrementes/environments",
 )
