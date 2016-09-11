@@ -50,12 +50,18 @@ def get_info():
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    stdout = logging.StreamHandler()
+    stdout.setLevel(logging.INFO)
+
+    logger.addHandler(stdout)
     try:
         parser = get_command_line_parser()
         (options, args) = parser.parse_args()
         validate_user_options(parser, options)
 
-        logger = setup_logger(app, options.log_file)
+        setup_logger(app, options.log_file)
 
         app.config['info_file'] = options.info_file
 
