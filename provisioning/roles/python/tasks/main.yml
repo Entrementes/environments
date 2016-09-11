@@ -21,6 +21,7 @@
     - setuptools
     - paramiko
     - PyYAML
+    - virtualenv
 
 
 

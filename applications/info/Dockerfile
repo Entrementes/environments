@@ -12,9 +12,9 @@ RUN bash -c 'mkdir -p /root/server/{conf,logs}' && tar zxf /tmp/Info_Server-0.0.
 
 RUN touch /root/server/logs/server.log
 
-COPY conf/app_info.json conf/app_info.json
-
 WORKDIR /root/server/
+
+COPY conf/app_info.json conf/app_info.json
 
 RUN python setup.py install
 

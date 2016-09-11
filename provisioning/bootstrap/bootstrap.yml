@@ -11,6 +11,14 @@
     name: ufw 
     state: stopped
 
+- name: Ensure locale configuration
+  locale_gen:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - en_US.UTF-8
+    - pt_BR.UTF-8
+
 - name: Create System group
   group: 
     name: "{{ users.system.name }}" 
